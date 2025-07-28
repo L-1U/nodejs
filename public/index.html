@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express.js + PostgreSQL Example</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Express.js + PostgreSQL Example</h1>
+            <p>A full-stack application with Docker Compose</p>
+        </header>
+
+        <div class="status-section">
+            <h2>System Status</h2>
+            <div id="status-indicator" class="status-indicator">
+                <span id="status-text">Checking...</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="section">
+                <h2>Users</h2>
+                <div class="form-group">
+                    <input type="text" id="userName" placeholder="Name" required>
+                    <input type="email" id="userEmail" placeholder="Email" required>
+                    <button onclick="createUser()">Add User</button>
+                </div>
+                <div id="users-list" class="data-list"></div>
+            </div>
+
+            <div class="section">
+                <h2>Posts</h2>
+                <div class="form-group">
+                    <input type="text" id="postTitle" placeholder="Post Title" required>
+                    <textarea id="postContent" placeholder="Post Content"></textarea>
+                    <select id="postUserId">
+                        <option value="">Select User</option>
+                    </select>
+                    <button onclick="createPost()">Add Post</button>
+                </div>
+                <div id="posts-list" class="data-list"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Built with Express.js, PostgreSQL, TypeORM, and Docker Compose</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
