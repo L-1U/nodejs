@@ -66,8 +66,6 @@ Thumbs.db
 
 # Docker
 .dockerignore
-Dockerfile
-docker-compose.yml
 
 # Logs
 logs

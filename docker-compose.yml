@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: express-postgres-db
+    environment:
+      POSTGRES_DB: example_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+  app:
+    build: .
+    container_name: express-app
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: example_db
+      DB_USER: postgres
+      DB_PASSWORD: password123
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
