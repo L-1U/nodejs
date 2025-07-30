@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -14,11 +15,11 @@ CREATE TABLE IF NOT EXISTS posts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert sample data
-INSERT INTO users (name, email) VALUES 
-    ('John Doe', 'john@example.com'),
-    ('Jane Smith', 'jane@example.com'),
-    ('Bob Johnson', 'bob@example.com');
+-- Insert sample data (passwords are hashed versions of 'password123')
+INSERT INTO users (name, email, password) VALUES 
+    ('John Doe', 'john@example.com', '$2b$10$rOCVZyNQ5oGhYb8WvDjrXeKJ9oGhYb8WvDjrXeKJ9oGhYb8WvDjrXe'),
+    ('Jane Smith', 'jane@example.com', '$2b$10$rOCVZyNQ5oGhYb8WvDjrXeKJ9oGhYb8WvDjrXeKJ9oGhYb8WvDjrXe'),
+    ('Bob Johnson', 'bob@example.com', '$2b$10$rOCVZyNQ5oGhYb8WvDjrXeKJ9oGhYb8WvDjrXeKJ9oGhYb8WvDjrXe');
 
 INSERT INTO posts (title, content, user_id) VALUES 
     ('First Post', 'This is the content of the first post', 1),

@@ -3,22 +3,42 @@ require('reflect-metadata');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
 const { AppDataSource } = require('./database');
 const userRoutes = require('./routes/users');
 const postRoutes = require('./routes/posts');
+const { router: authRoutes } = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Session configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // Set to true in production with HTTPS
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
 
 // Serve static files
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 

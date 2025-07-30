@@ -1,18 +1,20 @@
 // Global variables
 let users = [];
 let posts = [];
+let currentUser = null;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     checkSystemHealth();
-    loadUsers();
-    loadPosts();
+    checkAuthStatus();
     
     // Refresh data every 30 seconds
     setInterval(() => {
         checkSystemHealth();
-        loadUsers();
-        loadPosts();
+        if (currentUser) {
+            loadUsers();
+            loadPosts();
+        }
     }, 30000);
 });
 
@@ -229,6 +231,180 @@ async function deletePost(postId) {
         console.error('Error deleting post:', error);
         alert('Failed to delete post');
     }
+}
+
+// Authentication Functions
+
+// Check authentication status
+async function checkAuthStatus() {
+    try {
+        const response = await fetch('/api/auth/me', {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            currentUser = data.user;
+            showMainContent();
+            updateAuthStatus();
+            loadUsers();
+            loadPosts();
+        } else {
+            currentUser = null;
+            showAuthForms();
+            updateAuthStatus();
+        }
+    } catch (error) {
+        console.error('Error checking auth status:', error);
+        currentUser = null;
+        showAuthForms();
+        updateAuthStatus();
+    }
+}
+
+// Show/hide authentication forms
+function showTab(tabName) {
+    // Remove active class from all tabs and forms
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+    
+    // Add active class to selected tab and form
+    event.target.classList.add('active');
+    document.getElementById(tabName + '-form').classList.add('active');
+}
+
+// Register new user
+async function register() {
+    const name = document.getElementById('registerName').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const password = document.getElementById('registerPassword').value;
+    
+    if (!name || !email || !password) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    if (password.length < 6) {
+        alert('Password must be at least 6 characters long');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ name, email, password }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            currentUser = data.user;
+            showMainContent();
+            updateAuthStatus();
+            loadUsers();
+            loadPosts();
+            // Clear form
+            document.getElementById('registerName').value = '';
+            document.getElementById('registerEmail').value = '';
+            document.getElementById('registerPassword').value = '';
+        } else {
+            alert(`Registration failed: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error registering:', error);
+        alert('Registration failed. Please try again.');
+    }
+}
+
+// Login user
+async function login() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ email, password }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            currentUser = data.user;
+            showMainContent();
+            updateAuthStatus();
+            loadUsers();
+            loadPosts();
+            // Clear form
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        } else {
+            alert(`Login failed: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error logging in:', error);
+        alert('Login failed. Please try again.');
+    }
+}
+
+// Logout user
+async function logout() {
+    try {
+        const response = await fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            currentUser = null;
+            showAuthForms();
+            updateAuthStatus();
+        } else {
+            alert('Logout failed');
+        }
+    } catch (error) {
+        console.error('Error logging out:', error);
+        alert('Logout failed. Please try again.');
+    }
+}
+
+// Update authentication status display
+function updateAuthStatus() {
+    const userInfo = document.getElementById('user-info');
+    const logoutBtn = document.getElementById('logout-btn');
+    
+    if (currentUser) {
+        userInfo.textContent = `Welcome, ${currentUser.name}!`;
+        logoutBtn.style.display = 'inline-block';
+    } else {
+        userInfo.textContent = 'Not logged in';
+        logoutBtn.style.display = 'none';
+    }
+}
+
+// Show main content (hide auth forms)
+function showMainContent() {
+    document.getElementById('auth-section').style.display = 'none';
+    document.getElementById('main-content').style.display = 'grid';
+}
+
+// Show auth forms (hide main content)
+function showAuthForms() {
+    document.getElementById('auth-section').style.display = 'block';
+    document.getElementById('main-content').style.display = 'none';
 }
 
 // Utility function to escape HTML

@@ -1,13 +1,17 @@
-# Express.js + PostgreSQL Example Project
+# Express.js + PostgreSQL with Cookie Authentication
 
-A full-stack web application demonstrating Express.js with PostgreSQL using Docker Compose, TypeORM, and a modern frontend interface.
+A full-stack web application demonstrating Express.js with PostgreSQL using Docker Compose, TypeORM, and secure cookie-based authentication system.
 
 ## Features
 
+- **🔐 Authentication System** - Cookie-based user registration and login
+- **🔒 Password Security** - Bcrypt hashing with salt rounds
+- **🍪 Session Management** - HTTP-only cookies with expiration
+- **🛡️ Protected Routes** - Authentication required for main app access
 - **Express.js** REST API with CRUD operations
 - **PostgreSQL** database with Docker Compose
 - **TypeORM** for database operations and entity management
-- **Modern Frontend** with vanilla JavaScript and CSS
+- **Modern Frontend** with authentication forms and responsive design
 - **Docker Compose** for easy development setup
 - **Static File Serving** for frontend assets
 - **Health Check** endpoint for monitoring
@@ -16,12 +20,13 @@ A full-stack web application demonstrating Express.js with PostgreSQL using Dock
 
 ```
 ├── src/
-│   ├── app.js              # Main Express application
+│   ├── app.js              # Main Express application with session middleware
 │   ├── database.js         # TypeORM configuration
 │   ├── entities/           # Database entities
-│   │   ├── User.js
+│   │   ├── User.js         # User entity with password field
 │   │   └── Post.js
 │   └── routes/             # API routes
+│       ├── auth.js         # Authentication endpoints
 │       ├── users.js
 │       └── posts.js
 ├── public/                 # Static frontend files
@@ -50,8 +55,8 @@ A full-stack web application demonstrating Express.js with PostgreSQL using Dock
    ```
 
 3. **Access the application:**
-   - Frontend: http://localhost:3000
-   - API: http://localhost:3000/api
+   - Frontend: http://localhost:3000 (shows login/register forms)
+   - API: http://localhost:3000/api (includes authentication endpoints)
    - Health Check: http://localhost:3000/health
 
 4. **Stop services:**
@@ -77,6 +82,12 @@ A full-stack web application demonstrating Express.js with PostgreSQL using Dock
    ```
 
 ## API Endpoints
+
+### Authentication 🔐
+- `POST /api/auth/register` - Register new user with password hashing
+- `POST /api/auth/login` - Login user and create session
+- `POST /api/auth/logout` - Logout user and destroy session
+- `GET /api/auth/me` - Get current authenticated user
 
 ### Users
 - `GET /api/users` - Get all users
@@ -106,6 +117,7 @@ A full-stack web application demonstrating Express.js with PostgreSQL using Dock
 | `DB_NAME` | Database name | `example_db` |
 | `DB_USER` | Database user | `postgres` |
 | `DB_PASSWORD` | Database password | `password123` |
+| `SESSION_SECRET` | Session encryption key | `your-secret-key` |
 
 ## Database Schema
 
@@ -115,6 +127,7 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,  -- Bcrypt hashed password
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
@@ -134,13 +147,78 @@ CREATE TABLE posts (
 
 The database is initialized with sample users and posts:
 
-**Users:**
-- John Doe (john@example.com)
-- Jane Smith (jane@example.com)
-- Bob Johnson (bob@example.com)
+**Users (with authentication):**
+- John Doe (john@example.com) - Password: `password123`
+- Jane Smith (jane@example.com) - Password: `password123`
+- Bob Johnson (bob@example.com) - Password: `password123`
 
 **Posts:**
 - Sample posts linked to the users above
+
+## Authentication Usage 🔐
+
+### Getting Started with Authentication
+
+1. **Start the application** using Docker Compose:
+   ```bash
+   docker compose up -d
+   ```
+
+2. **Visit** http://localhost:3000 - you'll see the authentication interface
+
+3. **Register a new account** or **login with sample users**
+
+### Registration Flow
+
+1. Click the "Register" tab
+2. Fill in:
+   - **Name**: Your full name
+   - **Email**: Valid email address (must be unique)
+   - **Password**: Minimum 6 characters
+3. Click "Register"
+4. You'll be automatically logged in and redirected to the main application
+
+### Login Flow
+
+1. Use the "Login" tab (default)
+2. Enter credentials:
+   - **Sample Users**: Use the credentials listed above
+   - **Your Account**: Use your registered email and password
+3. Click "Login"
+4. Access the main application features
+
+### Session Management
+
+- **Automatic**: Sessions are maintained via HTTP-only cookies
+- **Duration**: 24 hours (configurable)
+- **Security**: Cookies are not accessible via JavaScript
+- **Persistence**: Sessions survive browser refresh
+- **Logout**: Click "Logout" to end session and return to auth forms
+
+### Security Features
+
+- **Password Hashing**: Bcrypt with 10 salt rounds
+- **Session Cookies**: HTTP-only, secure configuration
+- **CSRF Protection**: Session-based authentication
+- **Input Validation**: Email format, password length, required fields
+- **Error Handling**: Secure error messages without information leakage
+
+### Troubleshooting Authentication
+
+**"Column User.password does not exist" Error:**
+```bash
+# Reset database with fresh schema
+docker compose down -v
+docker compose up -d
+```
+
+**Session not persisting:**
+- Check browser cookie settings
+- Ensure you're accessing via http://localhost:3000 (not 127.0.0.1)
+
+**Registration/Login not working:**
+- Check application logs: `docker compose logs app`
+- Verify database connection: `docker compose logs postgres`
 
 ## Development
 

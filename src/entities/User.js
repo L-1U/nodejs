@@ -18,6 +18,10 @@ const User = new EntitySchema({
             length: 100,
             unique: true,
         },
+        password: {
+            type: 'varchar',
+            length: 255,
+        },
         created_at: {
             type: 'timestamp',
             default: () => 'CURRENT_TIMESTAMP',
